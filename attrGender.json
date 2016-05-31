@@ -1,0 +1,17 @@
+[
+  {
+    "AttributeGender": "Female",
+    "UbersGender": 0.138,
+    "TaxisGender": 0.08
+  },
+  {
+    "AttributeGender": "Male",
+    "UbersGender": 0.862,
+    "TaxisGender": 0.92
+  },
+  {
+    "AttributeGender": "No Preference",
+    "UbersGender": 1,
+    "TaxisGender": 1
+  }
+]

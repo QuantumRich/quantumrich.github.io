@@ -1,0 +1,32 @@
+[
+  {
+    "AttributeEdu": "Below H.S.",
+    "UbersEdu": 0.03,
+    "TaxisEdu": 0.163
+  },
+  {
+    "AttributeEdu": "High School",
+    "UbersEdu": 0.092,
+    "TaxisEdu": 0.362
+  },
+  {
+    "AttributeEdu": "Associate's",
+    "UbersEdu": 0.4,
+    "TaxisEdu": 0.288
+  },
+  {
+    "AttributeEdu": "College",
+    "UbersEdu": 0.369,
+    "TaxisEdu": 0.149
+  },
+  {
+    "AttributeEdu": "Postgraduate",
+    "UbersEdu": 0.108,
+    "TaxisEdu": 0.039
+  },
+  {
+    "AttributeEdu": "No Preference",
+    "UbersEdu": 1,
+    "TaxisEdu": 1
+  }
+]

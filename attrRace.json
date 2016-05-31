@@ -1,0 +1,32 @@
+[
+  {
+    "AttributeRace": "White",
+    "UbersRace": 0.403,
+    "TaxisRace": 0.262
+  },
+  {
+    "AttributeRace": "Black",
+    "UbersRace": 0.195,
+    "TaxisRace": 0.316
+  },
+  {
+    "AttributeRace": "Asian",
+    "UbersRace": 0.165,
+    "TaxisRace": 0.18
+  },
+  {
+    "AttributeRace": "Other",
+    "UbersRace": 0.059,
+    "TaxisRace": 0.02
+  },
+  {
+    "AttributeRace": "Hispanic",
+    "UbersRace": 0.177,
+    "TaxisRace": 0.222
+  },
+  {
+    "AttributeRace": "No Preference",
+    "UbersRace": 1,
+    "TaxisRace": 1
+  }
+]

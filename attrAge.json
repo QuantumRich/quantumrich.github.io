@@ -1,0 +1,32 @@
+[
+  {
+    "AttributeAge": "18-29",
+    "UbersAge": 0.191,
+    "TaxisAge": 0.085
+  },
+  {
+    "AttributeAge": "30-39",
+    "UbersAge": 0.301,
+    "TaxisAge": 0.199
+  },
+  {
+    "AttributeAge": "40-49",
+    "UbersAge": 0.263,
+    "TaxisAge": 0.272
+  },
+  {
+    "AttributeAge": "50-64",
+    "UbersAge": 0.218,
+    "TaxisAge": 0.363
+  },
+  {
+    "AttributeAge": "65+",
+    "UbersAge": 0.027,
+    "TaxisAge": 0.077
+  },
+  {
+    "AttributeAge": "No Preference",
+    "UbersAge": 1,
+    "TaxisAge": 1
+  }
+]

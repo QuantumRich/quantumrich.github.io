@@ -1,0 +1,1675 @@
+<html>
+
+<head>
+<title>INFO5100 Project2</title>
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+<link href='https://fonts.googleapis.com/css?family=Archivo+Narrow' rel='stylesheet' type='text/css'>
+<script src="leaflet.js"></script>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<!-- Google CDN jQuery -->
+ <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+ <script>
+ 	$(function() {
+ 		$('a[href*=#]:not([href=#])').click(function() {
+ 			if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+ 				var target = $(this.hash);
+ 				target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+ 				if (target.length) {
+ 					$('html,body').animate({
+ 						scrollTop: target.offset().top
+ 					}, 1000);
+ 					return false;
+ 				}
+ 			}
+ 		});
+ 	});
+ </script>
+
+<style>
+	body {
+		font-family: 'Archivo Narrow', sans-serif;
+	}
+	#mapid {
+		height: 600px; width: 1250px;
+	}
+
+	.regionPath{
+	  fill: #000;
+	  fill-opacity: .2;
+	  stroke: #fff;
+	  stroke-width: 1.5px;
+	}
+	.regionPath:hover{
+	  fill: brown;
+	  fill-opacity: .7;
+	}
+
+	.pickupCircle {
+		fill: red;
+		stroke: pink;
+		stroke-width: 1px;
+	}
+
+	.uberCircle {
+		fill: black;
+		stroke: white;
+		stroke-width: 1px;
+	}
+
+	.taxiCircle {
+		fill: yellow;
+		stroke: grey;
+		stroke-width: 1px;
+	}
+
+	path.slice{
+		stroke-width:2px;
+	}
+
+	polyline{
+		opacity: .3;
+		stroke: black;
+		stroke-width: 2px;
+		fill: none;
+	}
+
+	.info {
+	    padding: 6px 8px;
+	    font: 1.2em 'Archivo Narrow', Helvetica, sans-serif;
+	    background: white;
+	    background: rgba(255,255,255,0.8);
+	    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+	    border-radius: 5px;
+	    opacity: .9;
+	    height: 480px;
+	    width:300px;
+
+	}
+	.info h4 {
+	    margin: 0 0 5px;
+	    color: black;
+      opacity: .6;
+	}
+	.info4 {
+    padding: 10px;
+    font: 1.26em 'Archivo Narrow', Helvetica, sans-serif;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+    opacity: .9;
+    height: 380px;
+    width:260px;
+    position: relative;;
+    top: -350px; left: -950px;
+	}
+
+	.info4 p {
+	  /*padding-bottom: px;*/
+	  line-height: 120%;
+	}
+
+	#secondtitle h1 {
+	  float: left;
+		position: relative;
+		top:-15px;
+	}
+
+	#Arrow2 {
+		position: absolute;
+		top:585px;
+		left:1210px;
+	  z-index: 100;
+	  width: 2.5em;
+	  opacity: 0.5;
+	  float: right;
+	}
+
+	#Arrow2:hover {
+	  z-index: 100;
+	  width: 3em;
+	  float: right;
+	  opacity: 1;
+	  transition: 0.3s ease
+	}
+
+	#Arrow3div img {
+	  z-index: 100;
+		position:absolute;
+    top:685px;
+    left:1210px;
+	  width: 2.5em;
+
+	  opacity: .5;
+	}
+
+	#Arrow3div img:hover {
+	  z-index: 100;
+	  width: 3em;
+	  opacity: 1;
+	  transition: 0.3s ease
+	}
+
+
+	#yellowdotstext{
+	  color: #FFD700;
+		text-shadow: -0.6px 0 grey, 0 0.6px grey, 0.6px 0 grey, 0 -0.6px grey;
+	}
+
+	#blackdotstext {
+		text-shadow: -1px 0 grey, 0 1px grey, 1px 0 grey, 0 -1px grey;
+	}
+
+	#reddotstext{
+	  color: red;
+		text-shadow: -0.6px 0 grey, 0 0.6px grey, 0.6px 0 grey, 0 -0.6px grey;
+	}
+
+/* ====== Form ======  */
+
+  #totalPercentUber
+  {
+		position: absolute;;
+		top:1030px;
+		left: 1000px;
+    padding:0px;
+    font-weight:bold;
+  }
+
+  #totalPercentTaxi
+  {
+		position: absolute;
+		top:1030px;
+		left: 700px;
+    padding:0px;
+    font-weight:bold;
+  }
+
+  #wrap label.radiotitle
+  {
+  	font-weight:normal;
+    padding:2px;
+    font-family: 'Archivo Narrow', sans-serif;
+    font-size:1.3em;
+    font-style: bold;
+		font-style: italic;
+		color:blue;
+  }
+
+  #wrap input[type="radio"]
+  {
+  display:none;
+  }
+
+  form {
+    position: absolute;;
+    left: 270px;
+    top: 1090px;
+  }
+
+  input[type="radio"]:checked + label
+  {
+     display:none;
+     font-weight:normal;
+     display:inline;
+     display:inline-block;
+     padding:2px;
+     font-family: 'Archivo Narrow', sans-serif;
+     font-size:25px;
+     font-style: bold;
+
+  }
+
+  .agediv
+  {
+    display: inline-block;
+    vertical-align: top;
+    padding: 10px;
+  }
+
+  .educationdiv
+  {
+    display: inline-block;
+    vertical-align: top;
+    padding: 10px;
+  }
+
+  .genderdiv
+  {
+    display: inline-block;
+    vertical-align: top;
+    padding: 10px;
+  }
+
+  .ethnicitydiv
+  {
+    display: inline-block;
+    vertical-align: top;
+    padding: 10px;
+  }
+
+  .questionsbox
+  {
+      float: left;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+			border-style: ridge;
+			border-width: 2px;
+			height:205px;
+			width: auto;
+  }
+
+  .questionsbox label
+  {
+   font-weight:normal;
+   display:inline;
+   display:inline-block;
+      padding:4px 11px;
+    font-family: 'Archivo Narrow', sans-serif;
+      font-size:16px;
+      font-style: bold;
+      transition: font 0.2s ease
+  }
+
+  .questionsbox label:hover
+  {
+   font-weight:normal;
+   display:inline;
+   display:inline-block;
+      padding:4px 11px;
+    font-family: 'Archivo Narrow', sans-serif;
+      font-size:21px;
+      font-style: bold;
+      transition: font 0.2s ease
+  }
+
+  #finalWord {
+    padding: 5px;
+    position: absolute;
+    top: 710px;
+    left: 730px;
+    font-size: 90%;
+    opacity: .8;
+    border-style: ridge;
+  }
+
+  /* ====== Bars ======  */
+
+	#barPlot {
+		position: absolute;;
+		top: 720px;
+	}
+
+  .uberAge,.uberEdu,.uberRace,.uberGender{
+    fill:black;
+    stroke:grey;
+    stroke-width: .5;
+		opacity: .8;
+  }
+  .taxiAge,.taxiEdu,.taxiRace,.taxiGender{
+    fill:yellow;
+    stroke:grey;
+    stroke-width: .5;
+		opacity: .8;
+  }
+  /* hover effect for bars */
+  .uberAge:hover ~ .textPercentUberAge {
+    display: block;
+  }
+  .taxiAge:hover ~ .textPercentTaxiAge {
+    display: block;
+  }
+  .uberRace:hover ~ .textPercentUberRace {
+    display: block;
+  }
+  .taxiRace:hover ~ .textPercentTaxiRace {
+    display: block;
+  }
+  .uberEdu:hover ~ .textPercentUberEdu {
+    display: block;
+  }
+  .taxiEdu:hover ~ .textPercentTaxiEdu {
+    display: block;
+  }
+  .uberGender:hover ~ .textPercentUberGender {
+    display: block;
+  }
+  .taxiGender:hover ~ .textPercentTaxiGender {
+    display: block;
+  }
+
+  .textPercentUberAge {
+    display: none;
+    fill:black ;
+    opacity: .7;
+    font-size:85%;
+    dominant-baseline:start;
+  }
+  .textPercentTaxiAge {
+    display: none;
+    fill:black ;
+    opacity: .7;
+    font-size:85%;
+    dominant-baseline:middle;
+  }
+  .textPercentUberRace {
+    display: none;
+    fill:black ;
+    opacity: .7;
+    font-size:85%;
+    dominant-baseline:middle;
+  }
+  .textPercentTaxiRace {
+    display: none;
+    fill:black ;
+    opacity: .7;
+    font-size:85%;
+    dominant-baseline:middle;
+  }
+  .textPercentUberEdu {
+    display: none;
+    fill:black ;
+    opacity: .7;
+    font-size:85%;
+    dominant-baseline:middle;
+  }
+  .textPercentTaxiEdu {
+    display: none;
+    fill:black ;
+    opacity: .7;
+    font-size:85%;
+    dominant-baseline:middle;
+  }
+  .textPercentUberGender {
+    display: none;
+    fill:black ;
+    opacity: .7;
+    font-size:85%;
+    dominant-baseline:middle;
+  }
+  .textPercentTaxiGender {
+    display: none;
+    fill:black ;
+    opacity: .7;
+    font-size:85%;
+    dominant-baseline:middle;
+  }
+  .textAge,.textRace{
+    fill:black;
+    opacity: .7;
+    font-size:85%;
+    dominant-baseline:middle;
+    text-anchor:end;
+  }
+  .textEdu,.textGender{
+    fill:black;
+    opacity: .7;
+    font-size:85%;
+    dominant-baseline:middle;
+    text-anchor:end;
+  }
+
+/* ====== Donuts ======  */
+
+  #donutDemo1 {
+    position:absolute;
+    top: 820px;
+    left: 620px;
+  }
+  #donutDemo2 {
+    position:absolute;
+    top: 820px;
+    left: 930px;
+  }
+
+	#donutMap1 {
+		position:absolute;
+		opacity:0;
+		top: 10px;
+		left: 10px;
+	}
+	#donutMap2 {
+		position:absolute;
+		opacity:0;
+		top: 170px;
+		left: 10px;
+	}
+	#donutMap3 {
+		position:absolute;
+		opacity:0;
+		top: 330px;
+		left: 10px;
+	}
+
+	#donutMap1Text {
+		height: 1px;
+		position: relative;
+		left: 180px;
+		top: 50px;
+	}
+	#donutMap2Text {
+		height: 1px;
+		position: relative;
+		left: 180px;
+		top: 50px;
+	}
+	#donutMap3Text {
+		height: 1px;
+		position: relative;
+		left: 180px;
+		top: 50px;
+	}
+  .textDemoDonut1,.textDemoDonut2,.textMapDonut1,.textMapDonut2,.textMapDonut3 {
+    font-family: 'Archivo Narrow', sans-serif;
+  }
+
+  .polylineDemoDonut1,.polylineDemoDonut2,.polylineMapDonut1,.polylineMapDonut2,.polylineMapDonut3{
+    opacity: .6;
+    stroke: black;
+    stroke-width: 2px;
+    fill: none;
+  }
+
+	.percentVal {
+		font-size: 200%;
+		text-anchor:middle;
+		dominant-baseline:middle
+	}
+
+</style>
+</head>
+
+
+<body onload="calculateTotal()">
+	<a href="#secondtitle" ><img src="downarrowyellow2.png" id ="Arrow2"></a>
+  
+<div id = "firsttitle"><h1>Regional Comparison of Taxi and Uber Prices in New York City</h1></div>
+<div id="mapid"></div>
+<!-- <div id="spacer"></div> -->
+<div id ="secondtitle"><h1>How Do Uber and Taxi Drivers Demographically Compare?</h1></div>
+
+<div id = "barPlot"></div>
+<div id = "donutDemo1"></div>
+<div id="totalPercentTaxi"></div>
+<div id = "donutDemo2"></div>
+<div id="totalPercentUber"></div>
+
+<div id="wrap">
+
+  <form action="" id="demoChoiceForm" onsubmit="return false;">
+    <div class="questionsbox">
+      <div class="agediv">
+        <label class='radiotitle'>Select Driver Age</label>
+        </br>
+        <input type="radio" id="radiolabel1" name="age" value="age0" onclick="calculateTotal();" checked="checked"/><label for="radiolabel1">Unselected</label><br/>
+        <input type="radio" id="radiolabel2" name="age" value="age1" onclick="calculateTotal();" /><label for="radiolabel2">18-29</label><br/>
+        <input type="radio" id="radiolabel3" name="age" value="age2" onclick="calculateTotal();" /><label for="radiolabel3"> 30-39</label><br/>
+        <input type="radio" id="radiolabel4" name="age" value="age3" onclick="calculateTotal();" /><label for="radiolabel4">40-49</label><br/>
+        <input type="radio" id="radiolabel5"
+        name="age" value="age4" onclick="calculateTotal();" /><label for="radiolabel5">50-64</label><br/>
+        <input type="radio" id="radiolabel6" name="age" value="age5" onclick="calculateTotal();" /><label for="radiolabel6">65+</label><br/>
+        <br/><br/>
+      </div>
+
+      <div class="educationdiv">
+        <label class='radiotitle'>Select Driver Education</label>
+        </br>
+        <input type="radio" id="radiolabel7" name="education" value="edu0" onclick="calculateTotal();" checked="checked" /><label for="radiolabel7">Unselected</label><br/>
+        <input type="radio" id="radiolabel8" name="education" value="edu1" onclick="calculateTotal();" /><label for="radiolabel8">Below H.S.</label><br/>
+        <input type="radio" id="radiolabel9" name="education" value="edu2" onclick="calculateTotal();" /><label for="radiolabel9">High School</label><br/>
+        <input type="radio" id="radiolabel10" name="education" value="edu3" onclick="calculateTotal();" /><label for="radiolabel10">Associate's</label><br/>
+        <input type="radio" id="radiolabel11" name="education" value="edu4" onclick="calculateTotal();" /><label for="radiolabel11">College</label><br/>
+        <input type="radio" id="radiolabel12" name="education" value="edu5" onclick="calculateTotal();" /><label for="radiolabel12">Postgraduate</label><br/>
+        <br/><br/>
+      </div>
+
+      <div class="genderdiv">
+        <label class='radiotitle'>Select Driver Gender</label>
+        </br>
+        <input type="radio" id="radiolabel13" name="gender" value="gen0" onclick="calculateTotal();" checked="checked" /><label for="radiolabel13">Unselected</label><br/>
+        <input type="radio" id="radiolabel14" name="gender" value="gen1" onclick="calculateTotal();" /><label for="radiolabel14">Male</label><br/>
+        <input type="radio" id="radiolabel15" name="gender" value="gen2" onclick="calculateTotal();" /><label for="radiolabel15">Female</label><br/>
+        <br/><br/>
+      </div>
+
+      <div class="ethnicitydiv">
+        <label class='radiotitle'>Select Driver Ethnicity</label>
+        </br>
+        <input type="radio" id="radiolabel16" name="ethnicity" value="eth0" onclick="calculateTotal();" checked="checked" /><label for="radiolabel16">Unselected</label><br/>
+        <input type="radio" id="radiolabel17" name="ethnicity" value="eth1" onclick="calculateTotal();" /><label for="radiolabel17">White</label><br/>
+        <input type="radio" id="radiolabel18" name="ethnicity" value="eth2" onclick="calculateTotal();" /><label for="radiolabel18">Black</label><br/>
+        <input type="radio" id="radiolabel19" name="ethnicity" value="eth3" onclick="calculateTotal();" /><label for="radiolabel19">Asian</label><br/>
+        <input type="radio" id="radiolabel20" name="ethnicity" value="eth4" onclick="calculateTotal();" /><label for="radiolabel20">Other</label><br/>
+        <input type="radio" id="radiolabel21" name="ethnicity" value="eth5" onclick="calculateTotal();" /><label for="radiolabel21">Hispanic</label><br/>
+        <br/><br/>
+      </div>
+
+    </div>
+  </form>
+  <div id = "finalWord">
+    <b>What's the point?</b><br>
+    Comparing Taxi and Uber drivers we see more female, higher education <br>
+    levels, and more drivers of white ethnicity comparing Uber to Taxi. <br>
+    When combined, the visualization the effects of these trends <br>
+    are amplified as demonstrated in the visualization.
+  </div>
+  </div>
+    <div id = "Arrow3div">
+    <a href="#firsttitle" ><img src="uparrowyellow2.png" id ="Arrow3"></a>
+    </div>
+</body>
+
+<script>
+	//make a background leaflet map layer of NYC
+	var map = L.map("mapid").setView([40.75, -73.95], 12);
+	map.doubleClickZoom.disable();
+
+	// load a tile layer
+	// http://www.openstreetmap.org/#map=5/50.667/-0.088
+	var basetile1 = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
+	  attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a>' +
+				' | Imagery &copy <a href="http://mapbox.com">Mapbox</a>',
+			id: 'mapbox.light',
+      maxZoom: 16,
+      minZoom: 9
+    }).addTo(map);
+
+
+	var info = L.control();
+
+	info.onAdd = function (map) {
+	    this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+	    this.update();
+	    return this._div;
+	};
+
+	// method that we will use to update the control based on feature properties passed
+	info.update = function (props) {
+	    this._div.innerHTML =
+					'<div id = "donutMap1"><h4 id = "header1">Region Total Rides (% taxi cheaper)  </h4> '+
+					'<div id = "donutMap1Text"><h4 id = "header4">Percent of Total <br>Rides in NYC: </h4></div>'+
+					'</div>'+
+					'<div id = "donutMap2"><h4 id = "header2">Region Short Rides (% taxi cheaper)  </h4>'+
+					'<div id = "donutMap2Text"><h4 id = "header5">Percent of Total Short <br>Rides in NYC: </h4></div>'+
+					'</div>'+
+					'<div id = "donutMap3"><h4 id = "header3">Region Long Rides (% taxi cheaper)  </h4>'+
+					'<div id = "donutMap3Text"><h4 id = "header6">Percent of Total Long <br>Rides in NYC: </h4></div>'+
+					'</div>';
+	};
+
+	info.addTo(map);
+	var info3 = L.control();
+
+  info3.onAdd = function (map) {
+      this._div = L.DomUtil.create('div', 'info3'); // create a div with a class "info3"
+      this.update();
+      return this._div;
+  };
+
+  // method that we will use to update the control based on feature properties passed
+  info3.update = function (props) {
+      this._div.innerHTML = '<a href="#secondtitle" ><img src="downarrowyellow2.png" alt="arrow" id ="Arrow2"></a>';
+  };
+
+  info3.addTo(map);
+
+
+  var info4 = L.control();
+
+  info4.onAdd = function (map) {
+      this._div = L.DomUtil.create('div', 'info4'); // create a div with a class "info4"
+      this.update();
+      return this._div;
+  };
+
+  // method that we will use to update the control based on feature properties passed
+  info4.update = function (props) {
+      this._div.innerHTML = "<p><b>What's the point?</b></br> Our data visualization tells us that in NYC there is a greater proportion of rides being cheaper for taxis over short distances (<= 10 minutes) compared to long distances (> 10 minutes), with taxis cheaper overall. <p>A single click on an area allows you to view <span id='reddotstext'>pickup spots</span>. A second click on the same area to see where the rides drop off their customers. <span id='yellowdotstext'>Yellow dots</span> signify that taking a taxi would be cheaper on that route and <span id='blackdotstext'>black dots </span>signify that taking an Uber would be cheaper. This proportion is shown through the donut graphs on the right across different ride durations. </p><p>When satisfied, click the arrow in the bottom right corner to compare Taxi and Uber over another dimension: driver demographics.</p></p>";
+  };
+  info4.addTo(map);
+
+	//overlay SVG layer on the leaflet map to allow d3
+	var svg = d3.select(map.getPanes().overlayPane).append("svg");
+	var g = svg.append("g").attr("class", "leaflet-zoom-hide");
+
+	var dataPoints;
+	d3.json("uber_taxi_raw.json", function(error, data) {
+		if (error) throw error;
+		dataPoints = data;
+		loadRegions();
+	});
+
+	var clickedRegion;
+	function loadRegions(){
+		d3.json("nyccommunitydistricts.geojson", function(error, collection) {
+		  if (error) throw error;
+
+		  var transform = d3.geo.transform({point: projectPoint});
+		  var path = d3.geo.path().projection(transform);
+
+		  var feature = g.selectAll("path")
+	      .data(collection.features)
+		    .enter().append("path")
+		    .attr("class", "regionPath")
+		    .on("click", function(e) {
+					if (e.id == clickedRegion) {
+						swapCircles();
+					} else {
+						loadRegionPoints(e);
+						d3.select("#donutMap1").transition().style("opacity",0);
+						d3.select("#donutMap2").transition().style("opacity",0);
+						d3.select("#donutMap3").transition().style("opacity",0);
+						clickedRegion = e.id;
+					}
+		    });
+
+		  map.on("viewreset", reset);
+		  reset();
+
+		  // Reposition the SVG to cover the features.
+		  function reset() {
+		    var bounds = path.bounds(collection);
+		    var topLeft = bounds[0];
+	      var bottomRight = bounds[1];
+
+		    svg.attr("width", bottomRight[0] - topLeft[0])
+		        .attr("height", bottomRight[1] - topLeft[1])
+		        .style("left", topLeft[0] + "px")
+		        .style("top", topLeft[1] + "px");
+
+		    g.attr("transform", "translate("
+		    	+ -topLeft[0] + ","
+		    	+ -topLeft[1] + ")");
+
+		    feature.attr("d", path);
+		  }
+
+		  // Use Leaflet to implement a D3 geometric transformation.
+		  function projectPoint(x, y) {
+		    var point = map.latLngToLayerPoint(new L.LatLng(y, x));
+		    this.stream.point(point.x, point.y);
+		  }
+
+		});
+	}
+
+	//dynamically changed variables per region
+	var numUberCheap;
+	var numTaxiCheap;
+	var numShortUberCheap;
+	var numShortTaxiCheap;
+	var numLongUberCheap;
+	var numLongTaxiCheap;
+
+	var loadedPoints = [];
+	var circles;
+
+	function loadRegionPoints(e){
+		//hide old circles
+		circles = g.selectAll("circle")
+			.style("visibility","hidden");
+
+		//if datapoint is in the region selected, load the points
+		dataPoints.forEach(function(d) {
+			testPt = [d.pickup_longitude,d.pickup_latitude];
+			if( pointInPolygon(testPt,e.geometry.coordinates[0]) ){
+				loadedPoints.push(d);
+			}
+	  });
+
+		//make new circles for newly loaded points
+    circles = g.selectAll("circle")
+    	.data(loadedPoints)
+	    .enter().append("circle")
+	    .attr("r",3).attr("class","pickupCircle")
+	    .style("opacity", 0.5)
+	    .attr("pointer-events","none")
+    ;
+    //when user zooms the map, update circle positions
+    map.on("viewreset", update);
+		update();
+		function update() {
+			var whichCircle = "";
+			try{
+				whichCircle = circles.attr("class");
+				wasEmpty = false;
+			}
+			catch(error){
+				console.log("no data at this region");
+			};
+			if(whichCircle == "pickupCircle") {
+				circles
+				.attr("transform", function(d) {
+			 		return "translate("+
+			 			map.latLngToLayerPoint(new L.LatLng(d.pickup_latitude, d.pickup_longitude)).x +","+
+			  		map.latLngToLayerPoint(new L.LatLng(d.pickup_latitude, d.pickup_longitude)).y +")";
+				})
+				.attr("class","pickupCircle");
+			}
+			else if(whichCircle == "uberCircle" || whichCircle == "taxiCircle") {
+				circles
+				.attr("transform", function(d) {
+			 		return "translate("+
+			 			map.latLngToLayerPoint(new L.LatLng(d.dropoff_latitude, d.dropoff_longitude)).x +","+
+			  		map.latLngToLayerPoint(new L.LatLng(d.dropoff_latitude, d.dropoff_longitude)).y +")";
+				})
+				.attr("class",function(d) {
+		    	if (d.uber_fare_average < d.taxi_fare_amount) {
+		    		return "uberCircle";
+		    	}
+		    	else {
+		    		return "taxiCircle";
+		    	}
+		    });
+			}
+		}
+	}
+		//when user clicks the switch, swap between pickup and dropoff locations
+		function swapCircles() {
+			numTaxiCheap = 0;
+			numUberCheap = 0;
+			numShortUberCheap = 0;
+			numLongUberCheap = 0;
+			numShortTaxiCheap = 0;
+			numLongTaxiCheap = 0;
+
+			var whichCircle = "";
+			try{
+				whichCircle = circles.attr("class");
+				wasEmpty = false;
+			}
+			catch(error){
+				console.log("no data at this region");
+			};
+
+			if(whichCircle == "uberCircle" || whichCircle == "taxiCircle") {
+				circles.transition().duration(600)
+				.attr("transform", function(d) {
+			 		return "translate("+
+			 			map.latLngToLayerPoint(new L.LatLng(d.pickup_latitude, d.pickup_longitude)).x +","+
+			  		map.latLngToLayerPoint(new L.LatLng(d.pickup_latitude, d.pickup_longitude)).y +")";
+				})
+				.attr("class","pickupCircle");
+			}
+			else if(whichCircle == "pickupCircle") {
+				d3.select("#donutMap1").transition().style("opacity",1);
+				d3.select("#donutMap2").transition().style("opacity",1);
+				d3.select("#donutMap3").transition().style("opacity",1);
+				circles.transition().duration(600)
+				.attr("transform", function(d) {
+			 		return "translate("+
+			 			map.latLngToLayerPoint(new L.LatLng(d.dropoff_latitude, d.dropoff_longitude)).x +","+
+			  		map.latLngToLayerPoint(new L.LatLng(d.dropoff_latitude, d.dropoff_longitude)).y +")";
+				})
+				.attr("class",function(d) {
+		    	if (d.uber_fare_average < d.taxi_fare_amount) {
+		    		numUberCheap++;
+		    		if(d.uber_trip_time_estimate_seconds <= 600) //10 min or less
+		    			numShortUberCheap++;
+		    		else
+		    			numLongUberCheap++;
+		    		return "uberCircle";
+		    	}
+		    	else {
+		    		numTaxiCheap++;
+		    		if(d.taxi_trip_time_seconds <= 600) //10 min or less
+		    			numShortTaxiCheap++;
+		    		else
+		    			numLongTaxiCheap++;
+		    		return "taxiCircle";
+		    	}
+		    });
+				// call the update function
+				changeDemo();
+			}
+		}
+
+	// uses ray-casting algorithm to check if point is within a polygon
+	// retrieved from https://github.com/substack/point-in-polygon
+  function pointInPolygon (point, vs) {
+  	var xi, xj, i, intersect,
+	    x = point[0],
+	    y = point[1],
+	    inside = false;
+		for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+		  xi = vs[i][0],
+		  yi = vs[i][1],
+		  xj = vs[j][0],
+		  yj = vs[j][1],
+		  intersect = ((yi > y) != (yj > y))
+	      && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+		  if (intersect) inside = !inside;
+		}
+		return inside;
+  }
+/////////////////////===DONUT===
+
+</script>
+
+<script>
+
+// ==========================================  script for Bars  ==========================================
+
+var height = 600;
+var width = 1250;
+var padX = 110, padY1 = 20, padY2 = 260, padText1 = 43, padText2 = 4; padEdu = 3.6, padGender = 3.2;
+var rectWidth = 15, coe = 410, coeGender = 0.7, interval = 40;
+
+
+var ageObj,EduObj,RaceObj,GenderObj;
+var AttributeAgeArr = [],AttributeEduArr = [],AttributeRaceArr = [],AttributeGenderArr = [];
+var UbersAgeArr = [],UbersEduArr = [],UbersRaceArr = [],UbersGenderArr = [];
+var TaxisAgeArr = [],TaxisEduArr = [],TaxisRaceArr = [],TaxisGenderArr = [];
+
+var svgDemoBar = d3.select("#barPlot").append("svg")
+.attr("id","svgDemoBar")
+.attr("height", height)
+.attr("width", width)
+.style("background-color","white");  //#eeffcc
+// .style("opacity","0.6");
+
+d3.json("attrAge.json", function(error, data) {
+  if (error) throw error;
+  ageObj = data;
+  ageObj.forEach(function(d) {
+    AttributeAgeArr.push(d.AttributeAge);
+    UbersAgeArr.push(d.UbersAge);
+    TaxisAgeArr.push(d.TaxisAge);
+  });
+
+  // ====== svg for Age attribute ======
+  for (var i = 0; i < UbersAgeArr.length - 1; i++) {
+    svgDemoBar.append("rect")
+    .attr("class", "uberAge")
+    .attr("id", "uberRectAge" + i)
+    .attr("x", padX)
+    .attr("y", padY1 + interval * i)
+    .attr("width", UbersAgeArr[i] * coe)
+    .attr("height", rectWidth)
+    .attr("rx", 3).attr("ry", 1);
+    svgDemoBar.append("rect")
+    .attr("class", "taxiAge")
+    .attr("id", "taxiRectAge" + i)
+    .attr("x", padX)
+    .attr("y", padY1 + rectWidth + interval * i)
+    .attr("width", TaxisAgeArr[i] * coe)
+    .attr("height", rectWidth)
+    .attr("rx", 3).attr("ry", 1)
+    svgDemoBar.append("text")
+    .attr("class", "textAge")
+    .text(AttributeAgeArr[i])
+    .attr("x", padX - 10)
+    .attr("y", padY1 + rectWidth + interval * i);
+
+  }
+  // ====== svg for Age percent ======
+  for (var i = 0; i < UbersAgeArr.length - 1; i++) {
+    svgDemoBar.append("text")
+    .attr("class", "textPercentUberAge")
+    .attr("id","test")
+    .text((UbersAgeArr[i] * 100).toFixed(1) + "%")
+      .attr("x", padX + UbersAgeArr[i] * coe + padText2)
+    .attr("y", padY1 + interval * i + rectWidth / 2);
+    svgDemoBar.append("text")
+    .attr("class", "textPercentTaxiAge")
+    .text((TaxisAgeArr[i] * 100).toFixed(1) + "%")
+    .attr("x", padX + TaxisAgeArr[i] * coe + padText2)
+    .attr("y", padY1 + rectWidth + interval * i + rectWidth / 2);
+  }
+
+});
+
+d3.json("attrEdu.json", function(error, data) {
+  if (error) throw error;
+  EduObj = data;
+  EduObj.forEach(function(d) {
+    AttributeEduArr.push(d.AttributeEdu);
+    UbersEduArr.push(d.UbersEdu);
+    TaxisEduArr.push(d.TaxisEdu);
+  });
+  // ====== svg for Edu attribute ======
+  for (var i = 0; i < UbersEduArr.length - 1; i++) {
+    svgDemoBar.append("rect")
+    .attr("class", "uberEdu")
+    .attr("id", "uberRectEdu" + i)
+    .attr("x", padEdu * padX)
+    .attr("y", padY1 + interval * i)
+    .attr("width", UbersEduArr[i] * coe)
+    .attr("height", rectWidth)
+    .attr("rx", 3).attr("ry", 1);
+    svgDemoBar.append("rect")
+    .attr("class", "taxiEdu")
+    .attr("id", "taxiRectEdu" + i)
+    .attr("x", padEdu * padX)
+    .attr("y", padY1 + rectWidth + interval * i)
+    .attr("width", TaxisEduArr[i] * coe)
+    .attr("height", rectWidth)
+    .attr("rx", 3).attr("ry", 1);
+    svgDemoBar.append("text")
+    .attr("class", "textEdu")
+    .text(AttributeEduArr[i])
+    .attr("x", padEdu * padX - 10)
+    .attr("y", padY1 + rectWidth + interval * i);
+
+  }
+  // ====== svg for Edu percent ======
+  for (var i = 0; i < UbersEduArr.length - 1; i++) {
+    svgDemoBar.append("text")
+    .attr("class", "textPercentUberEdu")
+    .attr("id","test")
+    .text((UbersEduArr[i] * 100).toFixed(1) + "%")
+    .attr("x", padEdu * padX + UbersEduArr[i] * coe + padText2)
+    .attr("y", padY1 + interval * i + rectWidth / 2);
+    svgDemoBar.append("text")
+    .attr("class", "textPercentTaxiEdu")
+    .text((TaxisEduArr[i] * 100).toFixed(1) + "%")
+    .attr("x", padEdu * padX + TaxisEduArr[i] * coe + padText2)
+    .attr("y", padY1 + rectWidth + interval * i + rectWidth / 2);
+  }
+});
+
+d3.json("attrRace.json", function(error, data) {
+  if (error) throw error;
+  RaceObj = data;
+  RaceObj.forEach(function(d) {
+    AttributeRaceArr.push(d.AttributeRace);
+    UbersRaceArr.push(d.UbersRace);
+    TaxisRaceArr.push(d.TaxisRace);
+  });
+  // ====== svg for Race attribute ======
+  for (var i = 0; i < UbersRaceArr.length - 1; i++) {
+    svgDemoBar.append("rect")
+    .attr("class", "uberRace")
+    .attr("id", "uberRectRace" + i)
+    .attr("x", padX)
+    .attr("y", padY2 + interval * i)
+    .attr("width", UbersRaceArr[i] * coe)
+    .attr("height", rectWidth)
+    .attr("rx", 3).attr("ry", 1);
+    svgDemoBar.append("rect")
+    .attr("class", "taxiRace")
+    .attr("id", "taxiRectRace" + i)
+    .attr("x", padX)
+    .attr("y", padY2 + rectWidth + interval * i)
+    .attr("width", TaxisRaceArr[i] * coe)
+    .attr("height", rectWidth)
+    .attr("rx", 3).attr("ry", 1);
+    svgDemoBar.append("text")
+    .attr("class", "textRace")
+    .text(AttributeRaceArr[i])
+    .attr("x", padX - 10)
+    .attr("y", padY2 + rectWidth + interval * i);
+
+  }
+  // ====== svg for Race percent ======
+  for (var i = 0; i < UbersRaceArr.length - 1; i++) {
+    svgDemoBar.append("text")
+    .attr("class", "textPercentUberRace")
+    .attr("id","test")
+    .text((UbersRaceArr[i] * 100).toFixed(1) + "%")
+    .attr("x", padX + UbersRaceArr[i] * coe + padText2)
+    .attr("y", padY2 + interval * i + rectWidth / 2);
+    svgDemoBar.append("text")
+    .attr("class", "textPercentTaxiRace")
+    .text((TaxisRaceArr[i] * 100).toFixed(1) + "%")
+    .attr("x", padX + TaxisRaceArr[i] * coe + padText2)
+    .attr("y", padY2 + rectWidth + interval * i + rectWidth / 2);
+  }
+});
+
+d3.json("attrGender.json", function(error, data) {
+  if (error) throw error;
+  GenderObj = data;
+  GenderObj.forEach(function(d) {
+    AttributeGenderArr.push(d.AttributeGender);
+    UbersGenderArr.push(d.UbersGender);
+    TaxisGenderArr.push(d.TaxisGender);
+  });
+  // ====== svg for Gender attribute ======
+  for (var i = 0; i < UbersGenderArr.length - 1; i++) {
+    svgDemoBar.append("rect")
+    .attr("class", "uberGender")
+    .attr("id", "uberRectGender" + i)
+    .attr("x", padGender * padX)
+    .attr("y", padY2 + interval * i)
+    .attr("width", UbersGenderArr[i] * coe * coeGender)
+    .attr("height", rectWidth)
+    .attr("rx", 3).attr("ry", 1);
+    svgDemoBar.append("rect")
+    .attr("class", "taxiGender")
+    .attr("id", "taxiRectGender" + i)
+    .attr("x", padGender * padX)
+    .attr("y", padY2 + rectWidth + interval * i)
+    .attr("width", TaxisGenderArr[i] * coe * coeGender)
+    .attr("height", rectWidth)
+    .attr("rx", 3).attr("ry", 1);
+    svgDemoBar.append("text")
+    .attr("class", "textGender")
+    .text(AttributeGenderArr[i])
+    .attr("x", padGender * padX - 10)
+    .attr("y", padY2 + rectWidth + interval * i);
+
+  }
+  // ====== svg for Gender percent ======
+  for (var i = 0; i < UbersGenderArr.length - 1; i++) {
+    svgDemoBar.append("text")
+    .attr("class", "textPercentUberGender")
+    .attr("id","test")
+    .text((UbersGenderArr[i] * 100).toFixed(1) + "%")
+    .attr("x", padGender * padX + UbersGenderArr[i] * coe * coeGender + padText2)
+    .attr("y", padY2 + interval * i + rectWidth / 2);
+    svgDemoBar.append("text")
+    .attr("class", "textPercentTaxiGender")
+    .text((TaxisGenderArr[i] * 100).toFixed(1) + "%")
+    .attr("x", padGender * padX + TaxisGenderArr[i] * coe * coeGender + padText2)
+    .attr("y", padY2 + rectWidth + interval * i + rectWidth / 2);
+  }
+});
+
+// =======================================  script for donutDemo & donutMap & Form  =======================================
+
+var widthDemoDonut = 370,
+    heightDemoDonut = 200,
+  	radius = Math.min(widthDemoDonut, heightDemoDonut) / 2,
+  	widthMapDonut = 250,
+  	heightMapDonut = 180;
+
+// ====== donutDemo graph ======
+var svgDemoDonut1 = d3.select("#donutDemo1")
+  .append("svg")
+  .attr("height",heightDemoDonut)
+  .attr("width",widthDemoDonut)
+  .append("g");
+
+var svgDemoDonut2 = d3.select("#donutDemo2")
+  .append("svg")
+  .attr("height",heightDemoDonut)
+  .attr("width",widthDemoDonut)
+  .append("g");
+
+svgDemoDonut1.append("g")
+  .attr("class", "slices1")
+  .attr("transform", "translate(" + widthDemoDonut / 2 + "," + heightDemoDonut / 2 + ")");
+svgDemoDonut1.append("g")
+  .attr("class", "labels1")
+  .attr("transform", "translate(" + widthDemoDonut / 2 + "," + heightDemoDonut / 2 + ")");
+svgDemoDonut1.append("g")
+  .attr("class", "lines1")
+  .attr("transform", "translate(" + widthDemoDonut / 2 + "," + heightDemoDonut / 2 + ")");
+svgDemoDonut2.append("g")
+  .attr("class", "slices2")
+  .attr("transform", "translate(" + widthDemoDonut / 2 + "," + heightDemoDonut / 2 + ")");
+svgDemoDonut2.append("g")
+  .attr("class", "labels2")
+  .attr("transform", "translate(" + widthDemoDonut / 2 + "," + heightDemoDonut / 2 + ")");
+svgDemoDonut2.append("g")
+  .attr("class", "lines2")
+  .attr("transform", "translate(" + widthDemoDonut / 2 + "," + heightDemoDonut / 2 + ")");
+
+// ====== donutMap graph ======
+var svgMapDonut1 =d3.select("#donutMap1")
+	.append("svg")
+	.attr("height",heightMapDonut)
+	.attr("width",widthMapDonut)
+	.append("g")
+	.attr("transform", "scale(" + 0.7 + "," + 0.7 + ")");
+
+var svgMapDonut2 =d3.select("#donutMap2")
+	.append("svg")
+	.attr("height",heightMapDonut)
+	.attr("width",widthMapDonut)
+	.append("g")
+	.attr("transform", "scale(" + 0.7 + "," + 0.7 + ")");
+
+var svgMapDonut3 =d3.select("#donutMap3")
+	.append("svg")
+	.attr("height",heightMapDonut)
+	.attr("width",widthMapDonut)
+	.append("g")
+	.attr("transform", "scale(" + 0.7 + "," + 0.7 + ")");
+
+svgMapDonut1.append("g")
+  .attr("class", "slices3")
+  .attr("transform", "translate(" + widthMapDonut / 2 + "," + heightMapDonut / 2 + ")");
+svgMapDonut1.append("g")
+  .attr("class", "labels3")
+  .attr("transform", "translate(" + widthMapDonut / 2 + "," + heightMapDonut / 2 + ")");
+svgMapDonut1.append("g")
+  .attr("class", "lines3")
+  .attr("transform", "translate(" + widthMapDonut / 2 + "," + heightMapDonut / 2 + ")");
+svgMapDonut2.append("g")
+  .attr("class", "slices4")
+  .attr("transform", "translate(" + widthMapDonut / 2 + "," + heightMapDonut / 2 + ")");
+svgMapDonut2.append("g")
+  .attr("class", "labels4")
+  .attr("transform", "translate(" + widthMapDonut / 2 + "," + heightMapDonut / 2 + ")");
+svgMapDonut2.append("g")
+  .attr("class", "lines4")
+  .attr("transform", "translate(" + widthMapDonut / 2 + "," + heightMapDonut / 2 + ")");
+svgMapDonut3.append("g")
+  .attr("class", "slices5")
+  .attr("transform", "translate(" + widthMapDonut / 2 + "," + heightMapDonut / 2 + ")");
+svgMapDonut3.append("g")
+  .attr("class", "labels5")
+  .attr("transform", "translate(" + widthMapDonut / 2 + "," + heightMapDonut / 2 + ")");
+svgMapDonut3.append("g")
+  .attr("class", "lines5")
+  .attr("transform", "translate(" + widthMapDonut / 2 + "," + heightMapDonut / 2 + ")");
+
+var textMapHeader1 = d3.select("#header4")
+	.append("text")
+	.attr("class","headerText1");
+
+var textMapHeader2 = d3.select("#header5")
+	.append("text")
+	.attr("class","headerText2");
+
+var textMapHeader3 = d3.select("#header6")
+	.append("text")
+	.attr("class","headerText3");
+
+
+var pie = d3.layout.pie()
+  .sort(null)
+  .value(function(d) {
+    return d.value;
+  });
+
+var arc = d3.svg.arc()
+  .outerRadius(radius * 0.8)
+  .innerRadius(radius * 0.45);
+
+var outerArc = d3.svg.arc()
+  .innerRadius(radius * 0.7)
+  .outerRadius(radius * 1);
+
+var key = function(d){ return d.data.label; };
+
+var transportColor = d3.scale.ordinal()
+  .domain(["Taxi Selected", "Unselected"])
+  .range(["yellow", "#999966"]);
+var transportColor2 = d3.scale.ordinal()
+  .domain(["Uber", "Unselected"])
+  .range(["black", "#999966"]);
+var transportColor3 = d3.scale.ordinal()
+	.domain(["Taxi Selected", "Uber"])
+	.range(["yellow", "black"]);
+
+
+function changeDemo() {
+
+  /* ====== PIE Slices ====== */
+  var dataTaxiChance = [], dataUberChance = [];
+	var dataTotal = [], dataShort = [], dataLong = [];
+  dataTaxiChance.push({label: "Taxi Selected", value: taxiChance/100});
+  dataTaxiChance.push({label: "Unselected", value: (100-taxiChance)/100});
+  dataUberChance.push({label: "Uber Selected", value: uberChance/100});
+  dataUberChance.push({label: "Unselected", value: (100-uberChance)/100});
+	if(numTaxiCheap == null || numUberCheap == null || numShortTaxiCheap == null ||
+		numShortUberCheap == null || numLongTaxiCheap == null ||	numLongUberCheap == null){
+		numUberCheap = 50;
+		numTaxiCheap = 50;
+		numShortUberCheap = 50;
+		numShortTaxiCheap = 50;
+		numLongUberCheap = 50;
+		numLongTaxiCheap = 50;
+	}
+	dataTotal.push({label: "Taxi", value: numTaxiCheap});
+	dataTotal.push({label: "Uber", value: numUberCheap});
+	dataShort.push({label: "Taxi", value: numShortTaxiCheap});
+	dataShort.push({label: "Uber", value: numShortUberCheap});
+	dataLong.push({label: "Taxi", value: numLongTaxiCheap});
+	dataLong.push({label: "Uber", value: numLongUberCheap});
+
+
+  var sliceDemoDonut1 = svgDemoDonut1.select(".slices1").selectAll(".sliceDemoDonut1")
+    .data(pie(dataTaxiChance), key);
+  var sliceDemoDonut2 = svgDemoDonut2.select(".slices2").selectAll(".sliceDemoDonut2")
+    .data(pie(dataUberChance), key);
+
+	var sliceMapDonut1 = svgMapDonut1.select(".slices3").selectAll(".sliceMapDonut1")
+    .data(pie(dataTotal), key);
+	var sliceMapDonut2 = svgMapDonut2.select(".slices4").selectAll(".sliceMapDonut2")
+		.data(pie(dataShort), key);
+	var sliceMapDonut3 = svgMapDonut3.select(".slices5").selectAll(".sliceMapDonut3")
+		.data(pie(dataLong), key);
+
+
+  sliceDemoDonut1.enter()
+    .insert("path")
+    .attr("class", "sliceDemoDonut1")
+    .style("stroke","#b2b266")
+    .style("fill", function(d) { return transportColor(d.data.label); });
+  sliceDemoDonut2.enter()
+    .insert("path")
+    .attr("class", "sliceDemoDonut2")
+    .style("stroke","#b2b266")
+    .style("fill", function(d) { return transportColor2(d.data.label); });
+	sliceMapDonut1.enter()
+		.insert("path")
+		.attr("class", "sliceMapDonut1")
+		.style("stroke","#b2b266")
+		.style("fill", function(d) { return transportColor3(d.data.label); });
+	sliceMapDonut2.enter()
+		.insert("path")
+		.attr("class", "sliceMapDonut2")
+		.style("stroke","#b2b266")
+		.style("fill", function(d) { return transportColor3(d.data.label); });
+	sliceMapDonut3.enter()
+		.insert("path")
+		.attr("class", "sliceMapDonut3")
+		.style("stroke","#b2b266")
+		.style("fill", function(d) { return transportColor3(d.data.label); });
+
+	transSlice(sliceDemoDonut1);
+	transSlice(sliceDemoDonut2);
+	transSlice(sliceMapDonut1);
+	transSlice(sliceMapDonut2);
+	transSlice(sliceMapDonut3);
+	sliceDemoDonut1.exit().remove();
+	sliceDemoDonut2.exit().remove();
+	sliceMapDonut1.exit().remove();
+	sliceMapDonut2.exit().remove();
+	sliceMapDonut3.exit().remove();
+
+
+	function transSlice(slice) {
+		slice.transition().duration(1000)
+	    .attrTween("d", function(d) {
+	      this._current = this._current || d;
+	      var interpolate = d3.interpolate(this._current, d);
+	      this._current = interpolate(0);
+	      return function(t) {
+	        return arc(interpolate(t));
+	      };
+	    })
+	}
+
+
+  /* ====== TEXT LABELS ====== */
+
+  var textDemoDonut1 = svgDemoDonut1.select(".labels1").selectAll(".textDemoDonut1")
+    .data(pie(dataTaxiChance), key);
+  var textDemoDonut2 = svgDemoDonut2.select(".labels2").selectAll(".textDemoDonut2")
+    .data(pie(dataUberChance), key);
+
+	var textMapDonut1 = svgMapDonut1.select(".labels3").selectAll(".textMapDonut1")
+    .data(pie(dataTotal), key);
+	var textMapDonut2 = svgMapDonut2.select(".labels4").selectAll(".textMapDonut2")
+    .data(pie(dataShort), key);
+	var textMapDonut3 = svgMapDonut3.select(".labels5").selectAll(".textMapDonut3")
+    .data(pie(dataLong), key);
+
+  textDemoDonut1.enter()
+    .append("text")
+    .attr("class","textDemoDonut1")
+    .attr("dy", ".35em")
+    .text(function(d) {
+      return d.data.label;
+    });
+  textDemoDonut2.enter()
+    .append("text")
+    .attr("class","textDemoDonut2")
+    .attr("dy", ".35em")
+    .attr("transform", "translate(" + 100 + "," + 200 + ")")
+    .text(function(d) {
+      return d.data.label;
+    });
+	textMapDonut1.enter()
+    .append("text")
+    .attr("class","textMapDonut1")
+    .attr("dy", ".35em")
+    .text(function(d) {
+      return d.data.label;
+    });
+	textMapDonut2.enter()
+    .append("text")
+    .attr("class","textMapDonut2")
+    .attr("dy", ".35em")
+    .text(function(d) {
+      return d.data.label;
+    });
+	textMapDonut3.enter()
+		.append("text")
+		.attr("class","textMapDonut3")
+		.attr("dy", ".35em")
+		.text(function(d) {
+			return d.data.label;
+		});
+
+	transTextLabel(textDemoDonut1);
+	transTextLabel(textDemoDonut2);
+	transTextLabel(textMapDonut1);
+	transTextLabel(textMapDonut2);
+	transTextLabel(textMapDonut3);
+  textDemoDonut1.exit().remove();
+  textDemoDonut2.exit().remove();
+	textMapDonut1.exit().remove();
+	textMapDonut2.exit().remove();
+	textMapDonut3.exit().remove();
+
+  function midAngle(d){
+    return d.startAngle + (d.endAngle - d.startAngle)/2;
+  }
+
+	function transTextLabel(text) {
+		text.transition().duration(1000)
+	    .attrTween("transform", function(d) {
+	      this._current = this._current || d;
+	      var interpolate = d3.interpolate(this._current, d);
+	      this._current = interpolate(0);
+	      return function(t) {
+	        var d2 = interpolate(t);
+	        var pos = outerArc.centroid(d2);
+	        pos[0] = radius * 0.9 * (midAngle(d2) < Math.PI ? 1 : -1);
+	        return "translate("+ pos +")";
+	      };
+	    })
+	    .styleTween("text-anchor", function(d){
+	      this._current = this._current || d;
+	      var interpolate = d3.interpolate(this._current, d);
+	      this._current = interpolate(0);
+	      return function(t) {
+	        var d2 = interpolate(t);
+	        return midAngle(d2) < Math.PI ? "start":"end";
+	      };
+	    });
+	}
+
+  /* ====== slice1 TO TEXT POLYLINES ====== */
+  var polylineDemoDonut1 = svgDemoDonut1.select(".lines1").selectAll(".polylineDemoDonut1")
+    .data(pie(dataTaxiChance), key);
+  var polylineDemoDonut2 = svgDemoDonut2.select(".lines2").selectAll(".polylineDemoDonut2")
+    .data(pie(dataUberChance), key);
+
+	var polylineMapDonut1 = svgMapDonut1.select(".lines3").selectAll(".polylineMapDonut1")
+    .data(pie(dataTotal), key);
+	var polylineMapDonut2 = svgMapDonut2.select(".lines4").selectAll(".polylineMapDonut2")
+		.data(pie(dataShort), key);
+	var polylineMapDonut3 = svgMapDonut3.select(".lines5").selectAll(".polylineMapDonut3")
+		.data(pie(dataLong), key);
+
+  polylineDemoDonut1.enter()
+    .append("polyline")
+    .attr("class","polylineDemoDonut1");
+  polylineDemoDonut2.enter()
+    .append("polyline")
+    .attr("class","polylineDemoDonut2");
+	polylineMapDonut1.enter()
+    .append("polyline")
+    .attr("class","polylineMapDonut1");
+	polylineMapDonut2.enter()
+		.append("polyline")
+		.attr("class","polylineMapDonut2");
+	polylineMapDonut3.enter()
+    .append("polyline")
+    .attr("class","polylineMapDonut3");
+
+	transPolyline(polylineDemoDonut1);
+	transPolyline(polylineDemoDonut2);
+	transPolyline(polylineMapDonut1);
+	transPolyline(polylineMapDonut2);
+	transPolyline(polylineMapDonut3);
+
+	polylineDemoDonut1.exit().remove();
+	polylineDemoDonut2.exit().remove();
+	polylineMapDonut1.exit().remove();
+	polylineMapDonut2.exit().remove();
+	polylineMapDonut3.exit().remove();
+
+	function transPolyline(line) {
+		line.transition().duration(1000)
+	    .attrTween("points", function(d){
+	      this._current = this._current || d;
+	      var interpolate = d3.interpolate(this._current, d);
+	      this._current = interpolate(0);
+	      return function(t) {
+	        var d2 = interpolate(t);
+	        var pos = outerArc.centroid(d2);
+	        pos[0] = radius * 0.9 * (midAngle(d2) < Math.PI ? 1 : -1);
+	        return [arc.centroid(d2), outerArc.centroid(d2), pos];
+	      };
+	    });
+	}
+
+  // ====== Percent number inside donutDemo ======
+
+  var start_val = 0,
+      duration = 5000,
+      end_val = [
+				[d3.round(((taxiChance/100)*100),2)],
+				[d3.round(((uberChance/100)*100),2)],
+				[d3.round(((numTaxiCheap/(numTaxiCheap+numUberCheap))*100),2)],
+				[d3.round(((numShortTaxiCheap/(numShortTaxiCheap+numShortUberCheap))*100),2)],
+				[d3.round(((numLongTaxiCheap/(numLongTaxiCheap+numLongUberCheap))*100),2)]
+			];
+
+	transPercent1(svgDemoDonut1)
+	transPercent2(svgDemoDonut2)
+	transPercent3(svgMapDonut1)
+	transPercent4(svgMapDonut2)
+	transPercent5(svgMapDonut3)
+
+	function transPercent1(percent) {
+		percent.selectAll(".percentVal").remove();
+		percent.selectAll(".percentVal")
+			.data(end_val[0])
+			.enter()
+			.append("text")
+			.text(start_val)
+			.attr("class", "percentVal")
+			.attr("transform", "translate(" + widthDemoDonut / 2 + "," + heightDemoDonut / 2 + ")")
+			.transition()
+			.duration(1000)
+			.tween("text", function(d) {
+					var i = d3.interpolate(this.textContent, d),
+							prec = (d + "").split("."),
+							round = (prec.length > 1) ? Math.pow(10, prec[1].length) : 1;
+
+					return function(t) {
+							this.textContent = Math.round(i(t) * round) / round + "%";
+					};
+			});
+	}
+	function transPercent2(percent) {
+		percent.selectAll(".percentVal").remove();
+		percent.selectAll(".percentVal")
+			.data(end_val[1])
+			.enter()
+			.append("text")
+			.text(start_val)
+			.attr("class", "percentVal")
+			.attr("transform", "translate(" + widthDemoDonut / 2 + "," + heightDemoDonut / 2 + ")")
+			.transition()
+			.duration(1000)
+			.tween("text", function(d) {
+					var i = d3.interpolate(this.textContent, d),
+							prec = (d + "").split("."),
+							round = (prec.length > 1) ? Math.pow(10, prec[1].length) : 1;
+
+					return function(t) {
+							this.textContent = Math.round(i(t) * round) / round + "%";
+					};
+			});
+	}
+	function transPercent3(percent) {
+		percent.selectAll(".percentVal").remove();
+		percent.selectAll(".percentVal")
+			.data(end_val[2])
+			.enter()
+			.append("text")
+			.text(start_val)
+			.attr("class", "percentVal")
+			.attr("transform", "translate(" + widthDemoDonut / 2.9 + "," + heightDemoDonut / 2.25 + ")")
+			.transition()
+			.duration(1000)
+			.tween("text", function(d) {
+					var i = d3.interpolate(this.textContent, d),
+							prec = (d + "").split("."),
+							round = (prec.length > 1) ? Math.pow(10, prec[1].length) : 1;
+
+					return function(t) {
+							this.textContent = Math.round(i(t) * round) / round + "%";
+					};
+			});
+	}
+	function transPercent4(percent) {
+		percent.selectAll(".percentVal").remove();
+		percent.selectAll(".percentVal")
+			.data(end_val[3])
+			.enter()
+			.append("text")
+			.text(start_val)
+			.attr("class", "percentVal")
+			.attr("transform", "translate(" + widthDemoDonut / 2.9 + "," + heightDemoDonut / 2.25 + ")")
+			.transition()
+			.duration(1000)
+			.tween("text", function(d) {
+					var i = d3.interpolate(this.textContent, d),
+							prec = (d + "").split("."),
+							round = (prec.length > 1) ? Math.pow(10, prec[1].length) : 1;
+
+					return function(t) {
+							this.textContent = Math.round(i(t) * round) / round + "%";
+					};
+			});
+	}
+	function transPercent5(percent) {
+		percent.selectAll(".percentVal").remove();
+		percent.selectAll(".percentVal")
+			.data(end_val[4])
+			.enter()
+			.append("text")
+			.text(start_val)
+			.attr("class", "percentVal")
+			.attr("transform", "translate(" + widthDemoDonut / 2.9 + "," + heightDemoDonut / 2.25 + ")")
+			.transition()
+			.duration(1000)
+			.tween("text", function(d) {
+					var i = d3.interpolate(this.textContent, d),
+							prec = (d + "").split("."),
+							round = (prec.length > 1) ? Math.pow(10, prec[1].length) : 1;
+
+					return function(t) {
+							this.textContent = Math.round(i(t) * round) / round + "%";
+					};
+			});
+	}
+
+	/* ====== Header Text ====== */
+
+	textMapHeader1.text(d3.round(100*((numUberCheap+numTaxiCheap)/50879),3)+'%');
+	textMapHeader2.text(d3.round(100*((numShortUberCheap+numShortTaxiCheap)/19300),3)+'%');
+	textMapHeader3.text(d3.round(100*((numLongUberCheap+numLongTaxiCheap)/(50879-19300)),3)+'%');
+
+};	// changeDemo funciton end here
+
+  // ====== hardcode value for donutDemo & Form ======
+	 var ageArray = new Array();
+	 ageArray["age0"]=[1, 1];
+	 ageArray["age1"]=[0.191, 0.085];
+	 ageArray["age2"]=[0.301, 0.199];
+	 ageArray["age3"]=[0.263, 0.272];
+	 ageArray["age4"]=[0.218, 0.363];
+	 ageArray["age5"]=[0.027, 0.077];
+
+	 var educationArray= new Array();
+	 educationArray["edu0"]=[1, 1];
+	 educationArray["edu1"]= [0.03, 0.163];
+	 educationArray["edu2"]= [0.092, 0.362];
+	 educationArray["edu3"]= [0.4, 0.288];
+	 educationArray["edu4"]= [0.369, 0.149];
+	 educationArray["edu5"]= [0.108, 0.039];
+
+	 var genderArray= new Array();
+	 genderArray["gen0"]=[1, 1];
+	 genderArray["gen1"]= [0.862, 0.92];
+	 genderArray["gen2"]= [0.138, 0.08];
+
+	 var ethnicityArray= new Array();
+	 ethnicityArray["eth0"]=[1, 1];
+	 ethnicityArray["eth1"]= [0.403, 0.262];
+	 ethnicityArray["eth2"]= [0.195, 0.316];
+	 ethnicityArray["eth3"]= [0.165, 0.18];
+	 ethnicityArray["eth4"]= [0.059, 0.02];
+	 ethnicityArray["eth5"]= [0.177, 0.222];
+
+  // ====== funtions for Form ======
+  function getAge() {
+    var ageValue=[1,1];
+    var theForm = document.forms["demoChoiceForm"];
+    var selectedAge = theForm.elements["age"];
+    for(var i = 0; i < selectedAge.length; i++) {
+      if(selectedAge[i].checked) {
+        ageValue = ageArray[selectedAge[i].value];
+        break;
+      }
+    }
+    return ageValue;
+  }
+
+  function getGender() {
+    var genderValue=[1,1];
+    var theForm = document.forms["demoChoiceForm"];
+    var selectedGender = theForm.elements["gender"];
+    for(var i = 0; i < selectedGender.length; i++) {
+      if(selectedGender[i].checked) {
+        genderValue = genderArray[selectedGender[i].value];
+        break;
+      }
+    }
+    return genderValue;
+  }
+
+  function getEducation() {
+    var educationValue=[1,1];
+    var theForm = document.forms["demoChoiceForm"];
+    var selectedEducation = theForm.elements["education"];
+    for(var i = 0; i < selectedEducation.length; i++) {
+      if(selectedEducation[i].checked) {
+        educationValue = educationArray[selectedEducation[i].value];
+        break;
+      }
+    }
+    return educationValue;
+  }
+
+  function getEthnicity() {
+    var ethnicityValue=[1,1];
+    var theForm = document.forms["demoChoiceForm"];
+    var selectedEthnicity = theForm.elements["ethnicity"];
+    for(var i = 0; i < selectedEthnicity.length; i++) {
+      if(selectedEthnicity[i].checked) {
+        ethnicityValue = ethnicityArray[selectedEthnicity[i].value];
+        break;
+      }
+    }
+    return ethnicityValue;
+  }
+
+  var uberChance,taxiChance;
+  function calculateTotal() {
+    var ethValues = getEthnicity();
+    var genValues = getGender();
+    var ageValues = getAge();
+    var edValues = getEducation();
+
+    uberChance = 100*(ethValues[0]*genValues[0]*ageValues[0]*edValues[0]);
+    taxiChance = 100*(ethValues[1]*genValues[1]*ageValues[1]*edValues[1]);
+
+    var divobj = document.getElementById('totalPercentUber');
+    divobj.style.display='block';
+    divobj.innerHTML = "You have a "+Math.round(uberChance*100)/100+"% chance of getting <br>an Uber driver with selected attributes";
+
+    var divobj = document.getElementById('totalPercentTaxi');
+    divobj.style.display='block';
+    divobj.innerHTML = "You have a "+Math.round(taxiChance*100)/100+"% chance of getting <br>a Taxi driver with selected attributes";
+
+		// ====== call onload ======
+    changeDemo();
+  }
+</script>
+</body>
+
+</html>
