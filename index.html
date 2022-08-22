@@ -567,10 +567,10 @@
 
 	// load a tile layer
 	// http://www.openstreetmap.org/#map=5/50.667/-0.088
-	var basetile1 = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoicXVhbnR1bXJpY2giLCJhIjoiY2w3NTlwYjdtMDJ3ZDNxdWt3NWxybmkxciJ9.3o47D7nrrok3FYMgdNDLLw', {
+	var basetile1 = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoicXVhbnR1bXJpY2giLCJhIjoiY2w3NTlwYjdtMDJ3ZDNxdWt3NWxybmkxciJ9.3o47D7nrrok3FYMgdNDLLw', {
 	  attribution: 'Map data &copy; <a href="https://openstreetmap.org">OpenStreetMap</a>' +
 				' | Imagery &copy <a href="https://mapbox.com">Mapbox</a>',
-			id: 'mapbox.light',
+			id: 'mapbox/streets-v11',
       maxZoom: 12,
       minZoom: 9
     }).addTo(map);
